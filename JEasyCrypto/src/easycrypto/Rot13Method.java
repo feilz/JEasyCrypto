@@ -4,6 +4,12 @@ import easycrypto.EasyCryptoAPI.Result;
 import easycrypto.EasyCryptoAPI.ResultCode;
 
 class Rot13Method implements CryptoMethod {
+/*
+
+LIMITATION:
+Currently works with a-zA-Z characters only.
+
+*/
 
   @Override
   public Result encrypt(final String toEncrypt){
