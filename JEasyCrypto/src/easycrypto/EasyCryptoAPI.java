@@ -57,25 +57,29 @@ public class EasyCryptoAPI {
     @returns Returns success code of the encryption. See Result enum for details.
 	 */
 	public static Result encrypt(final String toEncrypt, final String method) {
-		try {
-			if (method.equalsIgnoreCase("reverse")) {
-				CryptoMethod theImpl = new ReverseMethod();
-				return theImpl.encrypt(toEncrypt);
-			} else if (method.equalsIgnoreCase("matrix")) {
-				CryptoMethod theImpl = new MatrixMethod();
-				return theImpl.encrypt(toEncrypt);
-			} else if (method.equalsIgnoreCase("cyr")) {
-				CryptoMethod theImpl = new CyrMethod();
-				return theImpl.encrypt(toEncrypt);
-			} else if (method.equalsIgnoreCase("rot13")){
-				CryptoMethod theImpl = new Rot13Method();
-				return theImpl.encrypt(toEncrypt);
-			}
+		if (toEncrypt!=null&&!toEncrypt.isEmpty()){
+			try {
+				if (method.equalsIgnoreCase("reverse")) {
+					CryptoMethod theImpl = new ReverseMethod();
+					return theImpl.encrypt(toEncrypt);
+				} else if (method.equalsIgnoreCase("matrix")) {
+					CryptoMethod theImpl = new MatrixMethod();
+					return theImpl.encrypt(toEncrypt);
+				} else if (method.equalsIgnoreCase("cyr")) {
+					CryptoMethod theImpl = new CyrMethod();
+					return theImpl.encrypt(toEncrypt);
+				} else if (method.equalsIgnoreCase("rot13")){
+					CryptoMethod theImpl = new Rot13Method();
+					return theImpl.encrypt(toEncrypt);
+				}
 
-		} catch (Exception e) {
-			return new Result(ResultCode.EError, e.getMessage());
+			} catch (Exception e) {
+				return new Result(ResultCode.EError, e.getMessage());
+			}
+			return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
+		}else{
+			return new Result(ResultCode.EError,"Error: you cannot encrypt empty strings");
 		}
-		return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
 	}
 
 	/**
@@ -86,26 +90,29 @@ public class EasyCryptoAPI {
     @returns Returns success code of the decryption. See Result enum for details.
 	 */
 	public static Result decrypt(final String toDecrypt, final String method) {
-		try {
-			if (method.equalsIgnoreCase("reverse")) {
-				CryptoMethod theImpl = new ReverseMethod();
-				return theImpl.decrypt(toDecrypt);
-			} else if (method.equalsIgnoreCase("matrix")) {
-				CryptoMethod theImpl = new MatrixMethod();
-				return theImpl.decrypt(toDecrypt);
-			} else if (method.equalsIgnoreCase("cyr")) {
-				CryptoMethod theImpl = new CyrMethod();
-				return theImpl.decrypt(toDecrypt);
-			}else if (method.equalsIgnoreCase("rot13")){
-				CryptoMethod theImpl = new Rot13Method();
-				return theImpl.decrypt(toDecrypt);
+		if (toEncrypt!=null&&!toEncrypt.isEmpty()){
+			try {
+				if (method.equalsIgnoreCase("reverse")) {
+					CryptoMethod theImpl = new ReverseMethod();
+					return theImpl.decrypt(toDecrypt);
+				} else if (method.equalsIgnoreCase("matrix")) {
+					CryptoMethod theImpl = new MatrixMethod();
+					return theImpl.decrypt(toDecrypt);
+				} else if (method.equalsIgnoreCase("cyr")) {
+					CryptoMethod theImpl = new CyrMethod();
+					return theImpl.decrypt(toDecrypt);
+				}else if (method.equalsIgnoreCase("rot13")){
+					CryptoMethod theImpl = new Rot13Method();
+					return theImpl.decrypt(toDecrypt);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new Result(ResultCode.EError, e.getMessage());
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new Result(ResultCode.EError, e.getMessage());
+			return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
+		}else{
+			return new Result(ResultCode.EError,"Error: you cannot decrypt empty strings");
 		}
-
-		return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
 	}
 
 	/** To query the version of the library.
