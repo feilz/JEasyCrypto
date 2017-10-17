@@ -77,7 +77,7 @@ public class EasyCryptoAPI {
 				return new Result(ResultCode.EError, e.getMessage());
 			}
 			return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
-		}else{
+		} else {
 			return new Result(ResultCode.EError,"Error: you cannot encrypt empty strings");
 		}
 	}
@@ -101,7 +101,7 @@ public class EasyCryptoAPI {
 				} else if (method.equalsIgnoreCase("cyr")) {
 					CryptoMethod theImpl = new CyrMethod();
 					return theImpl.decrypt(toDecrypt);
-				}else if (method.equalsIgnoreCase("rot13")){
+				} else if (method.equalsIgnoreCase("rot13")){
 					CryptoMethod theImpl = new Rot13Method();
 					return theImpl.decrypt(toDecrypt);
 				}
@@ -110,7 +110,7 @@ public class EasyCryptoAPI {
 				return new Result(ResultCode.EError, e.getMessage());
 			}
 			return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
-		}else{
+		} else {
 			return new Result(ResultCode.EError,"Error: you cannot decrypt empty strings");
 		}
 	}
