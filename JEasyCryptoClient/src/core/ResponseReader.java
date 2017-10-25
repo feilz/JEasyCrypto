@@ -1,3 +1,5 @@
+package core;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.net.DatagramPacket;
@@ -35,7 +37,14 @@ public class ResponseReader extends Thread {
 				System.out.println("Parsing...");
 				JSONObject root = (JSONObject) new JSONParser().parse(receivedData);
 				System.out.println("Parsed, handing JSON object to observer.");
-				observer.handleResponse(root);
+				Long test = new Long(-1);
+				if(root.get("id") == test) {
+					System.out.printf("Invalid data from Server");
+					break;
+				}
+				else {
+					observer.handleResponse(root);
+				}
 				
 			} catch (IOException | ParseException | InterruptedException e) {
 				// TODO Auto-generated catch block

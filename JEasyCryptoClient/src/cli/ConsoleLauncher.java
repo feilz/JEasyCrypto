@@ -1,46 +1,41 @@
+package cli;
+
 import java.io.Console;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import org.json.simple.JSONObject;
 
-public class CryptoClient implements Runnable, ReaderObserver {
+import core.*;
+
+public class ConsoleLauncher implements Runnable, ClientObserver {
 
 	private static final int CAPABILITY_MENU = 1;
 	private static final int ENCRYPT_MENU = 2;
 	private static final int DECRYPT_MENU = 3;
 	private static final int QUIT_MENU = 4;
-
-	private ResponseReader reader = null;
-
-	private DatagramSocket socket = null;
-	private InetAddress serverAddr = null;
-	private int serverPort = 10000;
-	
-	int requestId = 0;
 	
 	private Console console = System.console();
-		
+    private CryptoClient client = null;
+
+	public static void main(String[] args) {
+		new ConsoleLauncher().run();
+    }
+    
 	@Override
 	public void run() {
 		// Prepare variables.
-		try {
-			socket = new DatagramSocket(10001);
-			
-			serverAddr = queryServerAddress();
+		try {			
+			InetAddress serverAddr = queryServerAddress();
 			if (null == serverAddr) {
 				console.printf("Server address not given / invalid!\n");
 				console.printf("Quitting CryptoClient!\n");
 				return;
 			}
+            
+            this.client = new CryptoClient(serverAddr);
+			this.client.setObserver(this);
 			
-			reader = new ResponseReader(socket, this);
-			reader.start();
-
 			int choice;
 			do {
 				// Display menu.
@@ -76,10 +71,7 @@ public class CryptoClient implements Runnable, ReaderObserver {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			reader.interrupt();
-			reader = null;
-			socket.close();
-			socket = null;
+			client.stop();
 		}
 	}
 
@@ -96,11 +88,6 @@ public class CryptoClient implements Runnable, ReaderObserver {
 		}
 		return addr;
 	}
-
-	public static void main(String[] args) {
-		new CryptoClient().run();
-	}
-
 
 	private int selectMenuItem() {
 		int choice = -1;
@@ -132,54 +119,32 @@ public class CryptoClient implements Runnable, ReaderObserver {
 	}
 	
 	private void handleCapabilityRequest() throws IOException {
-		JSONObject request = new JSONObject();
-		request.put("id", requestId++);
-		request.put("operation", "capabilities");
-		String data = request.toJSONString();
-		byte[] serializedData = data.getBytes(StandardCharsets.UTF_16);
-		DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length, serverAddr, serverPort);
-		socket.send(packet);
+		String data = client.sendCapabilityRequest();
+		console.printf("Request for capability info: " + data + "\n\n");
 	}
 	
 	private void handleEncryptRequest() throws IOException {
-		JSONObject request = new JSONObject();
-		request.put("id", requestId++);
-		request.put("operation", "encrypt");
 		String method = enterText("Give encryption method", true);
-		String text = enterText("Give text to encrypt", false);
-		request.put("method", method);
-		request.put("data", text);
-		String data = request.toJSONString();
-		byte[] serializedData = data.getBytes(StandardCharsets.UTF_16);
-		DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length, serverAddr, serverPort);
-		socket.send(packet);
+        String text = enterText("Give text to encrypt", false);
+		String key = enterText("Give encryption key", false);
+		String data = client.sendEncryptRequest(method, text, key);
+		console.printf("Request for encryption: " + data + "\n\n");
 	}
 	
 	private void handleDecryptRequest() throws IOException {
-		JSONObject request = new JSONObject();
-		request.put("id", requestId++);
-		request.put("operation", "decrypt");
 		String method = enterText("Give decryption method", true);
-		String text = enterText("Give text to decrypt", false);
-		request.put("method", method);
-		request.put("data", text);
-		String data = request.toJSONString();
-		byte[] serializedData = data.getBytes(StandardCharsets.UTF_16);
-		DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length, serverAddr, serverPort);
-		socket.send(packet);
+        String text = enterText("Give text to decrypt", false);
+        String key = enterText("Give encryption key", false);
+		String data = client.sendDecryptRequest(method, text, key);
+		console.printf("Request for decryption: " + data + "\n\n");
 	}
 	
 	private void handleQuitRequest() {
-		reader.stopReading();
+		client.stop();
 	}
 
 	@Override
-	public void handleResponse(JSONObject response) throws InterruptedException {
-		System.out.println("Got response from reader...");
-
-		System.out.printf("Request ID: %d\n", response.get("id"));
-		System.out.printf("Operation: %s\n", response.get("operation"));
-		System.out.printf("Result: %d\n", response.get("result"));
-		System.out.printf("Data: %s\n", response.get("data"));
+	public void handleResponse(String response) {
+		System.out.print(response);
 	}
 }

@@ -10,6 +10,10 @@ LIMITATION:
 Currently works with a-zA-Z characters only.
 
 */
+	@Override
+	public boolean requiresKey() {
+	return false;
+	}
 
   @Override
   public Result encrypt(final String toEncrypt){
@@ -46,4 +50,18 @@ Currently works with a-zA-Z characters only.
   public String method(){
     return "rot13";
   }
+	
+	
+	//empty methods for interface
+	
+	@Override
+	public Result encrypt(final String toEncrypt, final String key) {
+		return new Result(ResultCode.EError, "Error: Wrong method accessed!");
+	}
+			
+	@Override
+	public Result decrypt(final String toDecrypt, final String key) {
+		return new Result(ResultCode.EError, "Error: Wrong method accessed!");
+	}
+	
 }

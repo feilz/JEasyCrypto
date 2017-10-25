@@ -56,6 +56,7 @@ public class EasyCryptoAPI {
     @param m The method of encryption.
     @returns Returns success code of the encryption. See Result enum for details.
 	 */
+
 	public static Result encrypt(final String toEncrypt, final String method) {
 		if (toEncrypt!=null&&!toEncrypt.isEmpty()){
 			try {
@@ -108,7 +109,7 @@ public class EasyCryptoAPI {
 			} catch (Exception e) {
 				e.printStackTrace();
 				return new Result(ResultCode.EError, e.getMessage());
-			}
+      }
 			return new Result(ResultCode.ENotSupported, "Error: Method not supported!");
 		} else {
 			return new Result(ResultCode.EError,"Error: you cannot decrypt empty strings");

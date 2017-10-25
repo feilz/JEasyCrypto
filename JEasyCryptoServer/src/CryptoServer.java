@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
@@ -59,14 +60,24 @@ public class CryptoServer implements Runnable {
 					if (operation.equalsIgnoreCase("encrypt")) {
 						String method = (String) root.get("method"); // encrypt/decrypt
 						String data = (String) root.get ("data"); // text to be handled
-						result = EasyCryptoAPI.encrypt(data, method);
+						String key = (String) root.get ("key"); // text to be handled
+						result = EasyCryptoAPI.encrypt(data, method, key);
+
 					} else if (operation.equalsIgnoreCase("decrypt")) {
 						String method = (String) root.get("method"); // encrypt/decrypt
 						String data = (String) root.get ("data"); // text to be handled
-						result = EasyCryptoAPI.decrypt(data, method);
+						String key = (String) root.get ("key"); // text to be handled
+						result = EasyCryptoAPI.decrypt(data, method, key);
+
 					} else if (operation.equalsIgnoreCase("capabilities")) {
-						String methods = EasyCryptoAPI.methods();
-						result = new EasyCryptoAPI.Result(EasyCryptoAPI.ResultCode.ESuccess, methods);
+						JSONArray methodArray = new JSONArray();
+						// Split string with , and loop through
+						String[] method = EasyCryptoAPI.methods().split(",");
+						for(String m : method) {
+							methodArray.add(m);	
+						}
+						// Stringify the JSONArray to conform to JSON
+						result = new EasyCryptoAPI.Result(EasyCryptoAPI.ResultCode.ESuccess, methodArray.toJSONString());
 					} else {
 						result = new EasyCryptoAPI.Result(EasyCryptoAPI.ResultCode.ENotSupported, "Operation not supported");
 					}
@@ -76,9 +87,10 @@ public class CryptoServer implements Runnable {
 					response = createResponse(operation, id, new EasyCryptoAPI.Result(EasyCryptoAPI.ResultCode.EError, ioe.getLocalizedMessage()));
 				} catch (ParseException e) {
 					e.printStackTrace();
+					id = -1;
 					response = createResponse(operation, id, new EasyCryptoAPI.Result(EasyCryptoAPI.ResultCode.EError, e.getLocalizedMessage()));
 				} finally {
-					if (null != response && null != sender) {
+					if (response != null && sender != null) {
 						System.out.println("Sending response: " + response);
 						byte[] serializedResponse = response.getBytes(StandardCharsets.UTF_16);
 						DatagramPacket sendPacket = new DatagramPacket(serializedResponse, serializedResponse.length);
